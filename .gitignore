@@ -1,0 +1,24 @@
+# dependencies
+/node_modules
+
+# Next.js
+/.next
+/out
+
+# testing
+/coverage
+
+# local files
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# local brainstorming artifacts
+/.superpowers
+
+# Vercel
+/.vercel
+
+# TypeScript
+*.tsbuildinfo

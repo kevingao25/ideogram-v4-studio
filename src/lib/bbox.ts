@@ -18,6 +18,40 @@ export function clampBbox([yMin, xMin, yMax, xMax]: Bbox): Bbox {
   return [top, left, bottom, right];
 }
 
+export function moveBbox(bbox: Bbox, deltaX: number, deltaY: number): Bbox {
+  const [yMin, xMin, yMax, xMax] = bbox;
+  const height = yMax - yMin;
+  const width = xMax - xMin;
+  const nextTop = Math.min(1000 - height, Math.max(0, yMin + deltaY));
+  const nextLeft = Math.min(1000 - width, Math.max(0, xMin + deltaX));
+
+  return [
+    Math.round(nextTop),
+    Math.round(nextLeft),
+    Math.round(nextTop + height),
+    Math.round(nextLeft + width),
+  ];
+}
+
+export function defaultBbox(index: number, total: number): Bbox {
+  const columns = total > 4 ? 3 : 2;
+  const rows = Math.ceil(total / columns);
+  const column = index % columns;
+  const row = Math.floor(index / columns);
+  const gap = 45;
+  const cellWidth = (1000 - gap * (columns + 1)) / columns;
+  const cellHeight = (1000 - gap * (rows + 1)) / rows;
+  const xMin = gap + column * (cellWidth + gap);
+  const yMin = gap + row * (cellHeight + gap);
+
+  return [
+    Math.round(yMin),
+    Math.round(xMin),
+    Math.round(yMin + cellHeight),
+    Math.round(xMin + cellWidth),
+  ];
+}
+
 export function pixelsToBbox(
   rect: PixelRect,
   canvasWidth: number,

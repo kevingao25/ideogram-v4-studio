@@ -92,6 +92,30 @@ function extractJsonPrompt(payload: Record<string, unknown>): unknown {
   return payload.json_prompt ?? (payload.data as Record<string, unknown> | undefined)?.json_prompt;
 }
 
+function readSessionKey() {
+  try {
+    return sessionStorage.getItem(KEY_STORAGE) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeSessionKey(value: string) {
+  try {
+    sessionStorage.setItem(KEY_STORAGE, value);
+  } catch {
+    // Some browser contexts block sessionStorage. The in-memory key still works for the active page.
+  }
+}
+
+function removeSessionKey() {
+  try {
+    sessionStorage.removeItem(KEY_STORAGE);
+  } catch {
+    // Ignore storage failures; clearing React state is enough for this demo.
+  }
+}
+
 function SectionNumber({ children }: { children: React.ReactNode }) {
   return <span className="section-number">{children}</span>;
 }
@@ -126,12 +150,16 @@ export function Studio() {
   const canvasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(KEY_STORAGE) ?? "";
+    const stored = readSessionKey();
     // Session state is restored after hydration so keys never enter server-rendered HTML.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setApiKey(stored);
     setSavedKey(stored);
-    setHistory(loadHistory(localStorage));
+    try {
+      setHistory(loadHistory(localStorage));
+    } catch {
+      setHistory([]);
+    }
     setHydrated(true);
   }, []);
 
@@ -149,7 +177,7 @@ export function Studio() {
       setGatewayError("Enter your Ideogram API key to continue.");
       return;
     }
-    sessionStorage.setItem(KEY_STORAGE, next);
+    writeSessionKey(next);
     setSavedKey(next);
     setGatewayError("");
   };
@@ -782,8 +810,8 @@ export function Studio() {
             <Input type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} />
             <Button
               onClick={() => {
-                sessionStorage.setItem(KEY_STORAGE, apiKey.trim());
-                setSavedKey(apiKey.trim());
+                    writeSessionKey(apiKey.trim());
+                    setSavedKey(apiKey.trim());
                 setShowSettings(false);
               }}
             >
@@ -792,7 +820,7 @@ export function Studio() {
             <button
               className="forget-key"
               onClick={() => {
-                sessionStorage.removeItem(KEY_STORAGE);
+                removeSessionKey();
                 setSavedKey("");
                 setApiKey("");
                 setShowSettings(false);

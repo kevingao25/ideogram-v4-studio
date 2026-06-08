@@ -41,6 +41,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const KEY_STORAGE = "ideogram-v4-studio-api-key";
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 const starterPrompt: V4Prompt = {
   high_level_description: "A modern exhibition poster celebrating the geometry of light.",
@@ -275,7 +276,9 @@ export function Studio() {
 
   const validateImage = () => {
     if (!image) throw new Error("Choose an image first.");
-    if (image.size > 10 * 1024 * 1024) throw new Error("Images must be 10 MB or smaller.");
+    if (image.size > MAX_UPLOAD_BYTES) {
+      throw new Error("Images must be 4 MB or smaller for the Vercel-hosted demo.");
+    }
     if (!["image/jpeg", "image/png", "image/webp"].includes(image.type)) {
       throw new Error("Choose a JPEG, PNG, or WebP image.");
     }
@@ -803,7 +806,7 @@ export function Studio() {
                 <>
                   <Upload className="size-6" />
                   <strong>Choose an image</strong>
-                  <span>JPEG, PNG, or WebP · 10 MB max</span>
+                  <span>JPEG, PNG, or WebP · 4 MB max</span>
                 </>
               )}
               <input

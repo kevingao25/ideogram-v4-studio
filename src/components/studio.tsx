@@ -427,7 +427,7 @@ export function Studio() {
         </button>
       </header>
 
-      <div className="demo-column">
+      <div className={cn("demo-column", mode === "create" && createStep === "arrange" && "demo-column--wide")}>
         {mode === "create" && (
           <>
             <nav className="create-progress" aria-label="Create image steps">
@@ -606,44 +606,119 @@ export function Studio() {
                 {missingBoxes > 0 && <span className="placement-warning">{missingBoxes} unplaced</span>}
               </div>
 
-              <div className="canvas-wrap">
-                <div
-                  ref={canvasRef}
-                  className="bbox-canvas"
-                  style={{ aspectRatio: canvasAspect }}
-                  onPointerMove={onPointerMove}
-                  onPointerUp={() => setDrag(null)}
-                  onPointerCancel={() => setDrag(null)}
-                  onPointerLeave={() => setDrag(null)}
-                >
-                  <div className="bbox-canvas__grid" />
-                  {elements.map((element, index) => {
-                    if (!element.bbox) return null;
-                    const rect = bboxToPixels(element.bbox, 1000, 1000);
-                    return (
-                      <div
-                        key={`${element.type}-box-${index}`}
-                        className={cn("bbox-item", selectedIndex === index && "bbox-item--active")}
-                        style={{
-                          left: `${rect.x / 10}%`,
-                          top: `${rect.y / 10}%`,
-                          width: `${rect.width / 10}%`,
-                          height: `${rect.height / 10}%`,
-                        }}
-                        onPointerDown={(event) => onPointerDown(event, index, "move")}
+              <div className="arrange-workbench">
+                <aside className="arrange-structure" aria-label="Structured prompt editor">
+                  <div className="arrange-structure__header">
+                    <strong>Structured prompt</strong>
+                    <span>{elements.length} elements</span>
+                  </div>
+                  <div className="element-cards element-cards--compact">
+                    {elements.map((element, index) => (
+                      <article
+                        key={`${element.type}-arrange-${index}`}
+                        className={cn(
+                          "element-card",
+                          selectedIndex === index && "element-card--selected",
+                        )}
                       >
-                        <span>{element.type === "text" ? element.text : element.desc}</span>
-                        <button
-                          aria-label={`Resize element ${index + 1}`}
-                          className="bbox-handle"
-                          onPointerDown={(event) => {
-                            event.stopPropagation();
-                            onPointerDown(event, index, "resize");
+                        <button className="element-card__heading" onClick={() => setSelectedIndex(index)}>
+                          <span className="element-dot" />
+                          <strong>{element.type === "text" ? element.text || "Text element" : `Object ${index + 1}`}</strong>
+                          <span className="type-pill">{element.type === "text" ? "TEXT" : "OBJECT"}</span>
+                          {element.bbox ? <Check className="size-4" /> : <Plus className="size-4" />}
+                        </button>
+
+                        <div className="element-card__body">
+                          {element.type === "text" && (
+                            <label>
+                              <span>Text</span>
+                              <Textarea
+                                value={element.text ?? ""}
+                                onChange={(event) => updateElement(index, { text: event.target.value })}
+                              />
+                            </label>
+                          )}
+                          <label>
+                            <span>Description</span>
+                            <Textarea
+                              value={element.desc}
+                              onChange={(event) => updateElement(index, { desc: event.target.value })}
+                            />
+                          </label>
+
+                          {element.bbox ? (
+                            <div className="coordinate-row">
+                              {(["TOP", "LEFT", "BOTTOM", "RIGHT"] as const).map((label, coordinate) => (
+                                <label key={label}>
+                                  <span>{label}</span>
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    max="1000"
+                                    value={element.bbox?.[coordinate] ?? 0}
+                                    onChange={(event) => {
+                                      const bbox = [...(element.bbox as Bbox)] as Bbox;
+                                      bbox[coordinate] = Number(event.target.value);
+                                      setElementBbox(index, bbox);
+                                    }}
+                                  />
+                                </label>
+                              ))}
+                            </div>
+                          ) : (
+                            <button
+                              className="add-box-button"
+                              onClick={() => setElementBbox(index, defaultBbox(index, elements.length))}
+                            >
+                              <Plus className="size-4" />
+                              Add bounding box
+                            </button>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </aside>
+
+                <div className="canvas-wrap">
+                  <div
+                    ref={canvasRef}
+                    className="bbox-canvas"
+                    style={{ aspectRatio: canvasAspect }}
+                    onPointerMove={onPointerMove}
+                    onPointerUp={() => setDrag(null)}
+                    onPointerCancel={() => setDrag(null)}
+                    onPointerLeave={() => setDrag(null)}
+                  >
+                    <div className="bbox-canvas__grid" />
+                    {elements.map((element, index) => {
+                      if (!element.bbox) return null;
+                      const rect = bboxToPixels(element.bbox, 1000, 1000);
+                      return (
+                        <div
+                          key={`${element.type}-box-${index}`}
+                          className={cn("bbox-item", selectedIndex === index && "bbox-item--active")}
+                          style={{
+                            left: `${rect.x / 10}%`,
+                            top: `${rect.y / 10}%`,
+                            width: `${rect.width / 10}%`,
+                            height: `${rect.height / 10}%`,
                           }}
-                        />
-                      </div>
-                    );
-                  })}
+                          onPointerDown={(event) => onPointerDown(event, index, "move")}
+                        >
+                          <span>{element.type === "text" ? element.text : element.desc}</span>
+                          <button
+                            aria-label={`Resize element ${index + 1}`}
+                            className="bbox-handle"
+                            onPointerDown={(event) => {
+                              event.stopPropagation();
+                              onPointerDown(event, index, "resize");
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
               <div className="step-actions">

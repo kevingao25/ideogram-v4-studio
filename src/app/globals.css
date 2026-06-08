@@ -180,6 +180,10 @@ button { color: inherit; }
   padding: 54px 0 90px;
 }
 
+.demo-column--wide {
+  width: min(100% - 40px, 1380px);
+}
+
 .demo-section {
   margin-bottom: 72px;
 }
@@ -501,6 +505,80 @@ button { color: inherit; }
   background: #e9e4dc;
 }
 
+.arrange-workbench {
+  display: grid;
+  grid-template-columns: minmax(360px, 440px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.arrange-structure,
+.canvas-wrap {
+  min-width: 0;
+}
+
+.arrange-structure {
+  max-height: calc(100vh - 210px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.arrange-structure__header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, .94);
+  backdrop-filter: blur(12px);
+}
+
+.arrange-structure__header strong {
+  font-size: 13px;
+}
+
+.arrange-structure__header span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.element-cards--compact {
+  border-top: 0;
+}
+
+.element-cards--compact .element-card__heading {
+  min-height: 58px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.element-cards--compact .element-card__heading > svg {
+  display: none;
+}
+
+.element-cards--compact .element-card__heading strong {
+  font-size: 16px;
+}
+
+.element-cards--compact .element-card__body {
+  padding: 0 16px 16px;
+}
+
+.element-cards--compact .element-card__body textarea {
+  min-height: 66px;
+  font-size: 14px;
+}
+
+.element-cards--compact .coordinate-row {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .bbox-canvas {
   position: relative;
   width: min(100%, 760px);
@@ -761,7 +839,8 @@ button { color: inherit; }
   }
 
   .mode-tabs button { flex: 1; }
-  .demo-column { width: min(100% - 24px, 920px); padding-top: 36px; }
+  .demo-column,
+  .demo-column--wide { width: min(100% - 24px, 920px); padding-top: 36px; }
   .demo-section { margin-bottom: 54px; }
   .create-progress { margin-bottom: 34px; }
   .create-progress button { flex-direction: column; align-items: center; gap: 3px; }
@@ -775,6 +854,8 @@ button { color: inherit; }
   .coordinate-row { grid-template-columns: repeat(2, 1fr); }
   .add-box-button { align-items: flex-start; flex-direction: column; }
   .add-box-button span { margin-left: 0; }
+  .arrange-workbench { grid-template-columns: 1fr; }
+  .arrange-structure { max-height: none; }
   .canvas-wrap { padding: 10px; }
   .bbox-canvas { min-height: 390px; }
   .generate-bar { grid-template-columns: 1fr; }
